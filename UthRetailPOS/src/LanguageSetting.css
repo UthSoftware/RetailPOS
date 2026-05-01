@@ -1,0 +1,390 @@
+/* ===== LanguageSetting.css — unified font, white table ===== */
+
+/* ── Root ─────────────────────────────────────────────────── */
+.app {
+  padding: 24px 28px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #1a1d2e;
+  background: #f4f6fb;
+  min-height: 100%;
+  box-sizing: border-box;
+}
+
+/* ── Header ──────────────────────────────────────────────── */
+.lm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  padding: 14px 20px;
+  border-radius: 10px;
+  border: 1px solid #e2e6ef;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  margin-bottom: 20px;
+  flex-shrink: 0;
+}
+
+.lm-header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.lm-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+  color: #1a1d2e;
+  font-family: inherit;
+}
+
+.lm-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ── Buttons ─────────────────────────────────────────────── */
+.lm-btn-primary {
+  background: #e03131;
+  color: #fff;
+  border: none;
+  padding: 9px 20px;
+  border-radius: 7px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, transform 0.1s;
+}
+.lm-btn-primary:hover { background: #c92a2a; transform: translateY(-1px); }
+
+.lm-btn-cancel {
+  padding: 9px 20px;
+  border: 1.5px solid #e2e6ef;
+  border-radius: 7px;
+  background: #fff;
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.15s, color 0.15s;
+}
+.lm-btn-cancel:hover { border-color: #e03131; color: #e03131; }
+
+.lm-btn-save {
+  background: #e03131;
+  color: #fff;
+  border: none;
+  padding: 9px 20px;
+  border-radius: 7px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+.lm-btn-save:hover { background: #c92a2a; }
+
+/* ── Column Chooser ──────────────────────────────────────── */
+.lm-col-chooser {
+  position: relative;
+}
+
+.lm-col-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1.5px solid #e2e6ef;
+  border-radius: 7px;
+  background: #fff;
+  color: #1a1d2e;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.15s, background 0.15s;
+}
+.lm-col-btn:hover { border-color: #e03131; background: #fff0f0; }
+
+.lm-col-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: #fff;
+  border: 1.5px solid #e2e6ef;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  padding: 10px 0;
+  min-width: 180px;
+  z-index: 200;
+}
+
+.lm-col-menu-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #6b7280;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 4px 14px 8px;
+  border-bottom: 1px solid #e2e6ef;
+  margin-bottom: 4px;
+}
+
+.lm-col-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1a1d2e;
+  cursor: pointer;
+  transition: background 0.12s;
+  font-family: inherit;
+}
+.lm-col-menu-item:hover { background: #f4f6fb; }
+.lm-col-menu-item input[type="checkbox"] {
+  accent-color: #e03131;
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+}
+
+/* ── Search ──────────────────────────────────────────────── */
+.lm-search {
+  padding: 9px 14px;
+  border: 1.5px solid #e2e6ef;
+  border-radius: 7px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #1a1d2e;
+  background: #fff;
+  outline: none;
+  width: 220px;
+  transition: border-color 0.15s;
+}
+.lm-search:focus { border-color: #e03131; box-shadow: 0 0 0 3px rgba(224,49,49,0.1); }
+
+/* ── Table Box ───────────────────────────────────────────── */
+.lm-table-box {
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #e2e6ef;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  overflow: auto;
+  flex: 1;
+}
+
+.lm-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: inherit;
+}
+
+/* Thead */
+.lm-table thead tr {
+  background: #f8f9fc;
+  border-bottom: 1.5px solid #e2e6ef;
+}
+
+.lm-table th {
+  padding: 11px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-align: left;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+/* Tbody — white rows */
+.lm-table tbody tr {
+  background: #ffffff;
+  border-bottom: 1px solid #e2e6ef;
+  transition: background 0.15s;
+}
+.lm-table tbody tr:last-child { border-bottom: none; }
+.lm-table tbody tr:hover { background: #f5f8ff; }
+
+.lm-table td {
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #1a1d2e;
+  vertical-align: middle;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.lm-empty-cell {
+  text-align: center;
+  padding: 40px 16px;
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+/* ── Status ──────────────────────────────────────────────── */
+.lm-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.lm-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  min-width: 72px;
+  font-family: inherit;
+}
+.lm-badge.green { background: #dcfce7; color: #166534; }
+.lm-badge.red   { background: #fee2e2; color: #b91c1c; }
+
+/* ── Toggle Switch ───────────────────────────────────────── */
+.lm-switch {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.lm-switch input { opacity: 0; width: 0; height: 0; }
+
+.lm-slider {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: #ef4444;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.lm-switch input:checked + .lm-slider { background: #22c55e; }
+.lm-slider::before {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  background: white;
+  top: 3px;
+  left: 3px;
+  border-radius: 50%;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.lm-switch input:checked + .lm-slider::before { transform: translateX(18px); }
+
+/* ── Action Buttons ──────────────────────────────────────── */
+.lm-icon-btn {
+  padding: 7px 10px;
+  border-radius: 7px;
+  border: 1.5px solid #e2e6ef;
+  background: #fff;
+  cursor: pointer;
+  margin-right: 6px;
+  font-size: 13px;
+  transition: all 0.15s;
+  vertical-align: middle;
+}
+.lm-icon-btn.edit  { color: #0284c7; border-color: #bae6fd; background: #f0f9ff; }
+.lm-icon-btn.edit:hover  { background: #e0f2fe; }
+.lm-icon-btn.delete { color: #dc2626; border-color: #fecaca; background: #fff5f5; }
+.lm-icon-btn.delete:hover { background: #fee2e2; }
+
+/* ── Modal ───────────────────────────────────────────────── */
+.lm-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.lm-modal {
+  width: 480px;
+  max-width: 95vw;
+  background: #fff;
+  border-radius: 12px;
+  padding: 28px 30px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+  font-family: inherit;
+}
+
+.lm-modal-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.lm-modal-top h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1d2e;
+  font-family: inherit;
+}
+.lm-modal-close {
+  font-size: 22px;
+  cursor: pointer;
+  color: #6b7280;
+  line-height: 1;
+}
+.lm-modal-close:hover { color: #e03131; }
+
+.lm-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.lm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.lm-field label {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #6b7280;
+  letter-spacing: 0.02em;
+  font-family: inherit;
+}
+.lm-field input {
+  padding: 10px 13px;
+  border: 1.5px solid #e2e6ef;
+  border-radius: 7px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #1a1d2e;
+  background: #fff;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.lm-field input:focus { border-color: #e03131; box-shadow: 0 0 0 3px rgba(224,49,49,0.1); }
+.lm-field input:disabled { background: #f3f4f8; color: #9ca3af; cursor: not-allowed; }
+
+.lm-toggle-line {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.lm-modal-actions {
+  margin-top: 22px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}

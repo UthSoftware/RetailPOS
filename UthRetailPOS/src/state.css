@@ -1,0 +1,279 @@
+/* ================= PAGE ================= */
+.page-container {
+  background: #f5f6fa;
+  min-height: 100vh;
+  padding: 30px;
+  display: flex;
+  justify-content: center;
+}
+
+/* ================= CARD ================= */
+.card {
+  width: 95%;
+  max-width: 1200px;
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+/* ================= HEADER ================= */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f3f4f6;
+  padding: 15px 20px;
+  border-radius: 12px;
+}
+
+.left-section {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+/* ================= BUTTON ================= */
+.create-btn {
+  background: #e11d2e;
+  color: #fff;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.create-btn:hover {
+  background: #c81c2a;
+}
+
+/* ================= SEARCH ================= */
+.search-input {
+  padding: 8px 12px;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  outline: none;
+}
+
+/* ================= TABLE ================= */
+.table-container {
+  margin-top: 25px;
+  background: #f3f4f6;
+  border-radius: 12px;
+  padding: 15px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+thead {
+  background: #e5e7eb;
+}
+
+th {
+  padding: 14px;
+  font-weight: 600;
+  text-align: left;
+  font-size: 13px;
+}
+
+td {
+  padding: 12px;
+  border-top: 1px solid #eee;
+}
+
+tbody tr {
+  background: #fff;
+}
+
+.no-data {
+  padding: 30px;
+  text-align: center;
+  color: #555;
+}
+
+/* ================= MODAL ================= */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.modal {
+  width: 500px;
+  background: #fff;
+  border-radius: 14px;
+  padding: 25px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+/* HEADER */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* BODY */
+.modal-body {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* FORM */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+/* ================= STATUS ROW (🔥 FINAL FIX) ================= */
+.form-group.status-row {
+  display: flex;
+  flex-direction: row;       /* 🔥 important */
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+}
+
+.form-group.status-row label {
+  min-width: 80px;
+  margin: 0;
+}
+
+/* STATUS TEXT */
+.status-text {
+  font-weight: 500;
+}
+
+.status-text.active {
+  color: #22c55e; /* green */
+}
+
+.status-text.inactive {
+  color: #ef4444; /* red */
+}
+
+/* ================= TOGGLE ================= */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 45px;
+  height: 22px;
+}
+
+.switch input {
+  display: none;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  background-color: #ef4444; /* red */
+  border-radius: 20px;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  transition: 0.3s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background: white;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+
+.switch input:checked + .slider {
+  background-color: #22c55e; /* green */
+}
+
+.switch input:checked + .slider:before {
+  transform: translateX(22px);
+}
+
+/* ================= ACTION ICONS ================= */
+.action-icons {
+  display: flex;
+  gap: 10px;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.action-icons span:hover {
+  transform: scale(1.2);
+}
+
+/* ================= FOOTER ================= */
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.cancel-btn {
+  background: #ddd;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.save-btn {
+  background: #e11d2e;
+  color: #fff;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.save-btn:hover {
+  background: #c81c2a;
+}
+
+/* CLOSE BUTTON */
+.close-btn {
+  background: #f3f4f6;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.close-btn:hover {
+  background: #fee2e2;
+  color: #e11d2e;
+}

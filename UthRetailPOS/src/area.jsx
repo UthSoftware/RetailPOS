@@ -1,0 +1,382 @@
+import { useState, useEffect, useCallback, useRef } from "react";
+import './Country.css';
+
+const API   = "/api/area";
+const LIMIT = 20;
+const EMPTY = { a_areacode: "", a_areanameen: "", a_areanamereg: "", a_pincode: "", a_cityid: "", a_active: true };
+
+const ALL_COLS = [
+  { key: "a_areacode",    label: "Code" },
+  { key: "a_areanameen",  label: "Name (English)" },
+  { key: "a_areanamereg", label: "Name (Regional)" },
+  { key: "a_pincode",     label: "PIN Code" },
+  { key: "a_cityid",      label: "City" },
+  { key: "a_active",      label: "Active" },
+  { key: "actions",       label: "Actions" },
+];
+
+export default function AreaManager() {
+  const [view, setView]               = useState("list");
+  const [rows, setRows]               = useState([]);
+  const [total, setTotal]             = useState(0);
+  const [editRecid, setEditRecid]     = useState(null);
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch]           = useState("");
+  const [page, setPage]               = useState(1);
+  const [sortBy, setSortBy]           = useState("a_areanameen");
+  const [sortDir, setSortDir]         = useState("ASC");
+  const [loading, setLoading]         = useState(false);
+  const [saving, setSaving]           = useState(false);
+  const [formData, setFormData]       = useState(EMPTY);
+  const [selected, setSelected]       = useState([]);
+  const [confirmDelete, setConfirmDelete] = useState(null);
+  const [toast, setToast]             = useState(null);
+  const [cities, setCities]           = useState([]);
+
+  const [visibleCols, setVisibleCols] = useState(() => ALL_COLS.reduce((acc, c) => ({ ...acc, [c.key]: true }), {}));
+  const [showColMenu, setShowColMenu] = useState(false);
+  const colMenuRef = useRef(null);
+
+  const totalPages = Math.max(1, Math.ceil(total / LIMIT));
+
+  const showToast = (msg, type = "success") => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (colMenuRef.current && !colMenuRef.current.contains(e.target)) setShowColMenu(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/city").then(r => r.json()).then(d => setCities(d.rows || [])).catch(() => {});
+  }, []);
+
+  const loadList = useCallback(async () => {
+    setLoading(true);
+    try {
+      const q = new URLSearchParams({ search, page, limit: LIMIT, sortBy, sortDir });
+      const res  = await fetch(`${API}?${q}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+      setRows(data.rows || []);
+      setTotal(data.total || 0);
+    } catch (e) {
+      showToast(e.message || "Failed to load", "error");
+    } finally {
+      setLoading(false);
+    }
+  }, [search, page, sortBy, sortDir]);
+
+  useEffect(() => { if (view === "list") loadList(); }, [loadList, view]);
+
+  useEffect(() => {
+    const t = setTimeout(() => { setSearch(searchInput); setPage(1); }, 400);
+    return () => clearTimeout(t);
+  }, [searchInput]);
+
+  const handleSort = (col) => {
+    if (sortBy === col) setSortDir(d => d === "ASC" ? "DESC" : "ASC");
+    else { setSortBy(col); setSortDir("ASC"); }
+    setPage(1);
+  };
+  const sortIcon = (col) => sortBy !== col ? " ↕" : sortDir === "ASC" ? " ↑" : " ↓";
+
+  const openCreate = async () => {
+    setFormData({ ...EMPTY, a_areacode: "Loading..." });
+    setEditRecid(null);
+    setView("form");
+    try {
+      const res  = await fetch(`${API}/next-code`);
+      const data = await res.json();
+      if (data.success) setFormData(f => ({ ...f, a_areacode: data.code }));
+    } catch {
+      setFormData(f => ({ ...f, a_areacode: "AREA-AUTO" }));
+    }
+  };
+
+  const openEdit = async (recid) => {
+    try {
+      const res  = await fetch(`${API}/${recid}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+      const a = data.data;
+      setFormData({
+        a_areacode:    a.a_areacode,
+        a_areanameen:  a.a_areanameen,
+        a_areanamereg: a.a_areanamereg || "",
+        a_pincode:     a.a_pincode || "",
+        a_cityid:      a.a_cityid || "",
+        a_active:      a.a_active,
+      });
+      setEditRecid(recid);
+      setView("form");
+    } catch (e) {
+      showToast(e.message || "Failed to load record", "error");
+    }
+  };
+
+  const handleSave = async () => {
+    if (!formData.a_areanameen.trim()) { showToast("Area Name (English) is required.", "error"); return; }
+    setSaving(true);
+    try {
+      const body = JSON.stringify({
+        a_areanameen:  formData.a_areanameen.trim(),
+        a_areanamereg: formData.a_areanamereg.trim(),
+        a_pincode:     formData.a_pincode.trim(),
+        a_cityid:      formData.a_cityid || null,
+        a_active:      formData.a_active,
+      });
+      const url    = editRecid ? `${API}/${editRecid}` : API;
+      const method = editRecid ? "PUT" : "POST";
+      const res  = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Save failed");
+      showToast(editRecid ? "Area updated successfully." : "Area created successfully.");
+      setView("list");
+      setEditRecid(null);
+    } catch (e) {
+      showToast(e.message || "Save failed", "error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteConfirmed = async () => {
+    try {
+      let res, data;
+      if (confirmDelete === "bulk") {
+        res  = await fetch(`${API}/bulk-delete`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ recids: selected }) });
+        data = await res.json();
+        if (!res.ok) throw new Error(data.message);
+        showToast(`${selected.length} record(s) deleted.`);
+        setSelected([]);
+      } else {
+        res  = await fetch(`${API}/${confirmDelete}`, { method: "DELETE" });
+        data = await res.json();
+        if (!res.ok) throw new Error(data.message);
+        showToast("Area deleted.");
+      }
+      setConfirmDelete(null);
+      loadList();
+    } catch (e) {
+      showToast(e.message || "Delete failed", "error");
+    }
+  };
+
+  const toggleActive = async (recid, e) => {
+    e.stopPropagation();
+    try {
+      const res  = await fetch(`${API}/${recid}/toggle`, { method: "PATCH" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+      loadList();
+    } catch (e) {
+      showToast(e.message || "Failed to update status", "error");
+    }
+  };
+
+  const handleCancel = () => { setView("list"); setEditRecid(null); };
+  const setField     = (k, v) => setFormData(f => ({ ...f, [k]: v }));
+
+  const allChecked = rows.length > 0 && rows.every(r => selected.includes(r.a_recid));
+  const toggleAll  = (e) => setSelected(e.target.checked ? rows.map(r => r.a_recid) : []);
+  const toggleRow  = (recid, checked) => setSelected(prev => checked ? [...prev, recid] : prev.filter(id => id !== recid));
+
+  const toggleCol  = (key) => setVisibleCols(prev => ({ ...prev, [key]: !prev[key] }));
+  const activeCols = ALL_COLS.filter(c => visibleCols[c.key]);
+  const colSpan    = 1 + activeCols.length;
+
+  return (
+    <div className="cm-root">
+      <div className="cm-page">
+        <div className="cm-subheader">
+          <span className="cm-subheader-title">Area</span>
+          <div style={{ flex: 1 }} />
+          {view === "form" ? (
+            <>
+              <button className="cm-btn-cancel" onClick={handleCancel}>Cancel</button>
+              <button className="cm-btn-primary" onClick={handleSave} disabled={saving}>
+                {saving ? "Saving…" : editRecid ? "Update" : "Save"}
+              </button>
+            </>
+          ) : (
+            <button className="cm-btn-primary" onClick={openCreate}>+ Create New</button>
+          )}
+        </div>
+
+        <div className="cm-card">
+          {view === "form" && (
+            <>
+              <div className="cm-card-header">AREA – {editRecid ? "EDIT RECORD" : "SINGLE RECORD VIEW"}</div>
+              <div className="cm-form-grid">
+                <div className="cm-field">
+                  <label>Area Code</label>
+                  <input type="text" value={formData.a_areacode} disabled />
+                </div>
+                <div className="cm-field">
+                  <label>Area Name (English) *</label>
+                  <input type="text" value={formData.a_areanameen} placeholder="e.g. Andheri West"
+                    onChange={e => setField("a_areanameen", e.target.value)} />
+                </div>
+                <div className="cm-field">
+                  <label>Area Name (Regional)</label>
+                  <input type="text" value={formData.a_areanamereg} placeholder="Regional name"
+                    onChange={e => setField("a_areanamereg", e.target.value)} />
+                </div>
+                <div className="cm-field">
+                  <label>PIN Code</label>
+                  <input type="text" value={formData.a_pincode} placeholder="e.g. 400053"
+                    onChange={e => setField("a_pincode", e.target.value)} />
+                </div>
+                <div className="cm-field">
+                  <label>City</label>
+                  <select value={formData.a_cityid} onChange={e => setField("a_cityid", e.target.value)}
+                    style={{ padding: "10px 13px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 14, fontFamily: "inherit", color: "var(--text)", background: "var(--white)", outline: "none" }}>
+                    <option value="">— Select City —</option>
+                    {cities.map(c => <option key={c.ct_recid} value={c.ct_recid}>{c.ct_nameen}</option>)}
+                  </select>
+                </div>
+                <div className="cm-field">
+                  <label>Active</label>
+                  <label className="cm-toggle" style={{ marginTop: 6 }}>
+                    <input type="checkbox" checked={formData.a_active}
+                      onChange={e => setField("a_active", e.target.checked)} />
+                    <span className="cm-toggle-slider" />
+                  </label>
+                </div>
+              </div>
+            </>
+          )}
+
+          {view === "list" && (
+            <>
+              <div className="cm-card-header">AREA – LIST VIEW</div>
+              <div className="cm-search-bar">
+                <input className="cm-search-input" type="text"
+                  placeholder="Search by name, code or PIN…"
+                  value={searchInput}
+                  onChange={e => setSearchInput(e.target.value)} />
+                {selected.length > 0 && (
+                  <button className="cm-btn-danger" style={{ marginLeft: 10 }}
+                    onClick={() => setConfirmDelete("bulk")}>
+                    🗑 Delete ({selected.length})
+                  </button>
+                )}
+                <span className="cm-count-badge">{total} record{total !== 1 ? "s" : ""}</span>
+                <div className="cm-col-chooser" ref={colMenuRef}>
+                  <button className="cm-col-btn" title="Show/hide columns" onClick={() => setShowColMenu(v => !v)}>
+                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                    Columns
+                  </button>
+                  {showColMenu && (
+                    <div className="cm-col-menu">
+                      <div className="cm-col-menu-title">Toggle Columns</div>
+                      {ALL_COLS.map(col => (
+                        <label key={col.key} className="cm-col-menu-item">
+                          <input type="checkbox" checked={visibleCols[col.key]} onChange={() => toggleCol(col.key)} />
+                          <span>{col.label}</span>
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="cm-table-wrap">
+                <table className="cm-table">
+                  <thead>
+                    <tr>
+                      <th style={{ width: 36 }}><input type="checkbox" checked={allChecked} onChange={toggleAll} /></th>
+                      {visibleCols.a_areacode    && <th onClick={() => handleSort("a_areacode")} style={{ cursor: "pointer" }}>Code{sortIcon("a_areacode")}</th>}
+                      {visibleCols.a_areanameen  && <th onClick={() => handleSort("a_areanameen")} style={{ cursor: "pointer" }}>Name (English){sortIcon("a_areanameen")}</th>}
+                      {visibleCols.a_areanamereg && <th>Name (Regional)</th>}
+                      {visibleCols.a_pincode     && <th>PIN Code</th>}
+                      {visibleCols.a_cityid      && <th>City</th>}
+                      {visibleCols.a_active      && <th className="center">Active</th>}
+                      {visibleCols.actions       && <th className="center">Actions</th>}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {loading ? (
+                      <tr><td colSpan={colSpan} style={{ textAlign: "center", padding: 32, color: "#aaa" }}>Loading…</td></tr>
+                    ) : rows.length === 0 ? (
+                      <tr><td colSpan={colSpan}>
+                        <div className="cm-empty">
+                          <div className="cm-empty-icon">📍</div>
+                          <div>{search ? "No matching areas." : "No areas yet. Click + Create New."}</div>
+                        </div>
+                      </td></tr>
+                    ) : rows.map(r => (
+                      <tr key={r.a_recid}>
+                        <td><input type="checkbox" checked={selected.includes(r.a_recid)}
+                          onChange={e => toggleRow(r.a_recid, e.target.checked)} /></td>
+                        {visibleCols.a_areacode    && <td><strong>{r.a_areacode}</strong></td>}
+                        {visibleCols.a_areanameen  && <td>{r.a_areanameen}</td>}
+                        {visibleCols.a_areanamereg && <td style={{ color: "#666" }}>{r.a_areanamereg || "—"}</td>}
+                        {visibleCols.a_pincode     && <td>{r.a_pincode || "—"}</td>}
+                        {visibleCols.a_cityid      && <td style={{ color: "#666" }}>{r.a_cityid || "—"}</td>}
+                        {visibleCols.a_active      && (
+                          <td className="center">
+                            <label className="cm-toggle" title="Toggle active">
+                              <input type="checkbox" checked={r.a_active}
+                                onChange={e => toggleActive(r.a_recid, e)} />
+                              <span className="cm-toggle-slider" />
+                            </label>
+                          </td>
+                        )}
+                        {visibleCols.actions && (
+                          <td className="center">
+                            <button className="cm-btn-edit" onClick={() => openEdit(r.a_recid)}>Edit</button>
+                            <button className="cm-btn-danger" onClick={() => setConfirmDelete(r.a_recid)}>Delete</button>
+                          </td>
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {total > LIMIT && (
+                <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"12px 16px", fontSize:13, color:"#6b7280" }}>
+                  <span>Showing {(page-1)*LIMIT+1}–{Math.min(page*LIMIT,total)} of {total}</span>
+                  <div style={{ display:"flex", gap:6 }}>
+                    <button className="cm-btn-cancel" onClick={() => setPage(1)} disabled={page===1}>«</button>
+                    <button className="cm-btn-cancel" onClick={() => setPage(p=>p-1)} disabled={page===1}>‹</button>
+                    <span style={{ padding:"4px 10px" }}>Page {page} / {totalPages}</span>
+                    <button className="cm-btn-cancel" onClick={() => setPage(p=>p+1)} disabled={page===totalPages}>›</button>
+                    <button className="cm-btn-cancel" onClick={() => setPage(totalPages)} disabled={page===totalPages}>»</button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+
+      {confirmDelete && (
+        <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.4)", display:"flex", alignItems:"center", justifyContent:"center", zIndex:999 }}>
+          <div style={{ background:"#fff", borderRadius:12, padding:"28px 32px", minWidth:320, textAlign:"center", boxShadow:"0 8px 32px rgba(0,0,0,0.2)" }}>
+            <div style={{ fontSize:36, marginBottom:12 }}>⚠️</div>
+            <h3 style={{ marginBottom:8 }}>Are you sure?</h3>
+            <p style={{ color:"#6b7280", marginBottom:20, fontSize:13 }}>
+              {confirmDelete === "bulk" ? `Permanently delete ${selected.length} selected areas?` : "Permanently delete this area?"}
+            </p>
+            <div style={{ display:"flex", gap:10, justifyContent:"center" }}>
+              <button className="cm-btn-cancel" onClick={() => setConfirmDelete(null)}>Cancel</button>
+              <button className="cm-btn-danger" onClick={handleDeleteConfirmed}>Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {toast && <div className={`cm-toast cm-toast-${toast.type}`}>{toast.msg}</div>}
+    </div>
+  );
+}
