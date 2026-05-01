@@ -1,6 +1,6 @@
 const express = require("express");
-const cors = require("cors");
-const dotenv = require("dotenv");
+const cors    = require("cors");
+const dotenv  = require("dotenv");
 
 dotenv.config({ path: "../.env" });
 
@@ -16,15 +16,19 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ── Health check ───────────────────────────────────────────────────────────
-app.get("/", (req, res) => res.send("API Running 🚀"));
+app.get("/",       (req, res) => res.send("API Running 🚀"));
 app.get("/health", (req, res) => res.json({ status: "ok", timestamp: new Date().toISOString() }));
 
 // ── Routes ─────────────────────────────────────────────────────────────────
-const languageRoutes = require("./routes/language.routes");
-const countryRoutes  = require("./routes/countryRoutes");
-
-app.use("/api/languages", languageRoutes);
-app.use("/api/country",   countryRoutes);
+app.use("/api/languages",   require("./routes/language.routes"));
+app.use("/api/country",     require("./routes/countryRoutes"));
+app.use("/api/state",       require("./routes/stateRoutes"));
+app.use("/api/city",        require("./routes/cityRoutes"));
+app.use("/api/area",        require("./routes/areaRoutes"));
+app.use("/api/banks",       require("./routes/banks.routes"));
+app.use("/api/sys-forms",   require("./routes/sysForm.routes"));
+app.use("/api/sys-tables",  require("./routes/sysTables.routes"));
+app.use("/api/sys-modules", require("./routes/modules.routes"));
 
 // ── 404 handler ────────────────────────────────────────────────────────────
 app.use((req, res) => {
